@@ -1,0 +1,57 @@
+<LinearLayout
+    android:orientation="vertical"
+    android:layout_height="fill_parent"
+    android:layout_width="fill_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/grid"
+    android:rowCount="2"
+    android:columnCount="2"
+    android:useDefaultMargins="true">
+
+
+    <view
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        class="com.example.iems.testapp.Signal"
+        android:id="@+id/signalView"
+        android:clickable="false"
+        android:elevation="20dp"
+        android:background="#ffffffff"
+       />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@+id/messages"
+        android:layout_weight="1" >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/scrollLayout"></LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_gravity="center_horizontal">
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/editText"
+            android:layout_weight="1" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:text="Send"
+            android:id="@+id/button"
+            android:layout_weight=".1"
+            android:onClick="setMessage"
+            />
+    </LinearLayout>
+
+</LinearLayout>
