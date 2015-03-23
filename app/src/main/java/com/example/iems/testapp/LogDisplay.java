@@ -1,10 +1,7 @@
 package com.example.iems.testapp;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.TextView;
 
@@ -12,12 +9,13 @@ import android.widget.TextView;
 public class LogDisplay extends ActionBarActivity {
 
     private TextView text;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_display);
 
-        text = (TextView)findViewById(R.id.logView);
+        text = (TextView) findViewById(R.id.logView);
     }
 
     @Override

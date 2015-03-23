@@ -4,47 +4,50 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.provider.MediaStore;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.text.Editable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.ScrollView;
 import android.widget.Space;
-import android.widget.Switch;
-import android.widget.TextView;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static android.widget.LinearLayout.*;
+import static android.widget.LinearLayout.GONE;
+import static android.widget.LinearLayout.VISIBLE;
 
 
-public class MainActivity extends ActionBarActivity{
+public class MainActivity extends ActionBarActivity {
 
-    ScrollView slider;
-    LinearLayout scroll;
-    EditText text;
-    Signal sig;
-
-    Switch signalVis;
-
+    public final int SETTINGS_REQUEST_CODE = 1;
     private final String delim = "_";
-    private int counter = 0;
+    private final int DEFAULT_PORT = 50001;
+    private final int COOLDOWN_TIME = 1000;
+
+    private ScrollView slider;
+    private LinearLayout scroll;
+    private EditText text;
+    private Signal sig;
+    private String startMessage;
+    private String stopMessage;
+
+    public static int width;
+    public static int height;
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String message = intent.getStringExtra("message");
+            messageSelector(message);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,14 +56,17 @@ public class MainActivity extends ActionBarActivity{
 
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter(Intent.ACTION_SEND));
 
-        scroll = (LinearLayout)findViewById(R.id.scrollLayout);
-        text = (EditText)findViewById(R.id.editText);
-        sig = (Signal)findViewById(R.id.signalView);
-        slider = (ScrollView)findViewById(R.id.messages);
+        scroll = (LinearLayout) findViewById(R.id.scrollLayout);
+        text = (EditText) findViewById(R.id.editText);
+        sig = (Signal) findViewById(R.id.signalView);
+        slider = (ScrollView) findViewById(R.id.messages);
 
 
-       Intent serviceIntent = new Intent(this, NetworkService.class);
-       startService(serviceIntent);
+        Intent serviceIntent = new Intent(this, NetworkService.class);
+        serviceIntent.putExtra("port", DEFAULT_PORT);
+        startService(serviceIntent);
+
+
     }
 
     @Override
@@ -89,11 +95,40 @@ public class MainActivity extends ActionBarActivity{
         if (CacheLog.isInstantiated())
             CacheLog.writeLog("Starting MainActivity");
 
-        signalVis = (Switch)findViewById(R.id.sigToggle);
-        if (signalVis != null)
-            sig.setVisibility(signalVis.isActivated()?VISIBLE:INVISIBLE);
-       // LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter(Intent.ACTION_SEND));
+        //Sets the visibility of the signal
+        SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
+        boolean toggleVisibility = prefs.getBoolean("toggle", true);
+        startMessage = prefs.getString("start", "");
+        stopMessage = prefs.getString("stop", "");
+
+        if (toggleVisibility)
+            sig.setVisibility(VISIBLE);
+        else
+            sig.setVisibility(GONE);
+
         scrollToBottom();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == SETTINGS_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                sig.setVisibility(data.getBooleanExtra("signal", true) ? VISIBLE : GONE);
+
+                Intent servIntent = new Intent(this, NetworkService.class);
+                servIntent.putExtra("port", data.getIntExtra("port", DEFAULT_PORT));
+                startService(servIntent);
+
+                String dir = data.getStringExtra("folder");
+                if (dir != null)
+                    CacheLog.setFileDir(dir);
+
+                startMessage = data.getStringExtra("start");
+                stopMessage = data.getStringExtra("stop");
+            }
+        }
     }
 
     @Override
@@ -114,33 +149,24 @@ public class MainActivity extends ActionBarActivity{
         switch (id) {
             case R.id.action_settings:
                 intent = new Intent(this, Settings.class);
-                startActivity(intent);
+                startActivityForResult(intent, SETTINGS_REQUEST_CODE);
                 break;
             case R.id.action_log:
                 intent = new Intent(this, LogDisplay.class);
                 startActivity(intent);
                 break;
-            case R.id.action_stop_service:
-                intent = new Intent(this, NetworkService.class);
-                stopService(intent);
-                break;
-            case R.id.action_clear:
+            case R.id.action_file_out:
                 CacheLog.clearData("cleared_data");
+            case R.id.action_clear:
                 scroll.removeAllViews();
+                break;
+
+
         }
 
 
         return super.onOptionsItemSelected(item);
     }
-
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            String message = intent.getStringExtra("message");
-            messageSelector(message);
-        }
-    };
 
     private void messageSelector(String message) {
 
@@ -152,31 +178,64 @@ public class MainActivity extends ActionBarActivity{
         switch (tokens[0]) {
             case "left":
                 sig.setLeft();
-                counter = 500;
-                CacheLog.writeData("Received",tokens[0]);
+                CacheLog.writeData("left", "");
+                signalCooldown();
                 break;
             case "center":
                 sig.setCenter();
-                counter = 500;
-                CacheLog.writeData("Received",tokens[0]);
+                CacheLog.writeData("center", "");
+                signalCooldown();
                 break;
             case "right":
                 sig.setRight();
-                counter = 500;
-                CacheLog.writeData("Received",tokens[0]);
+                CacheLog.writeData("right", "");
+                signalCooldown();
                 break;
+
             case "start":
-                CacheLog.writeData("Received",tokens[0]);
-                return;
+
+                if (tokens.length > 1)
+                    CacheLog.setFileName("Subject-" + tokens[1]);
+                else
+                    CacheLog.setFileName("Subject-noname");
+
+                if (startMessage != null && startMessage.length() >= 1) {
+                    CacheLog.writeData("start", startMessage);
+                    setMessage(startMessage);
+                    return;
+                }
+                else {
+                    if (tokens.length > 1)
+                        CacheLog.writeData("start", tokens[1]);
+                    else
+                        CacheLog.writeData("start", "");
+                }
+                break;
+
             case "stop":
-                CacheLog.writeData("Received",tokens[0]);
-                CacheLog.clearData("");
-                return;
+                //CacheLog.writeData("Received", tokens[0]);
+                if (stopMessage != null && stopMessage.length() >= 1) {
+                    setMessage(stopMessage);
+                    CacheLog.writeData("stop",stopMessage);
+                    return;
+                }
+                else {
+                    if (tokens.length > 1)
+                        CacheLog.writeData("stop", tokens[1]);
+                    else
+                        CacheLog.writeData("stop", "");
+                }
+
+                CacheLog.clearData(null);
+                break;
             default:
+                if (tokens.length > 1)
+                    setMessage(tokens[1]);
+
+                break;
 
         }
-        if (tokens.length > 1)
-            setMessage(tokens[1]);
+
     }
 
     public void setMessage(String s) {
@@ -204,7 +263,7 @@ public class MainActivity extends ActionBarActivity{
         scrollToBottom();
 
         Space filler = new Space(this);
-        filler.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,25,1f));
+        filler.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 25, 1f));
         scroll.addView(filler);
     }
 
@@ -217,32 +276,15 @@ public class MainActivity extends ActionBarActivity{
     }
 
     private void signalCooldown() {
-        runOnUiThread(new Thread() {
-            @Override
-            public void run() {
-                int time = 100;
-                while (true) {
-                    try {
-                        Thread.sleep(time);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+        Handler handler = new Handler();
+        handler.postDelayed(
+                new Thread() {
+                    @Override
+                    public void run() {
+                        sig.reset();
                     }
-
-                    if (counter == 0) {
-                        sig.invalidate();
-                        Log.wtf("Sig", "Resetting");
-                    }
-                    else if (counter < 0)
-                        continue;
-
-                    counter -= time;
-
-                }
-            }
-        });
+                }, COOLDOWN_TIME);
     }
-
-
 
 
 }

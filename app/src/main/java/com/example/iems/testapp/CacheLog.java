@@ -1,29 +1,30 @@
 package com.example.iems.testapp;
 
-import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
-import static android.os.Environment.*;
+import static android.os.Environment.MEDIA_MOUNTED;
+import static android.os.Environment.getExternalStorageState;
 
 /**
  * Created by IEMS on 3/3/2015.
  */
 public class CacheLog {
-    private static final String fileName = "Log.txt";
     private static ArrayList<String> log;
     private static ArrayList<String> data;
     private static long startTime = 0;
     private static long startLogTime = 0;
+
+    private static String fileName = "default.txt";
+    private static String fileDir = "Driving Sim";
 
     public static void instantiate() {
         if (log == null)
@@ -31,12 +32,12 @@ public class CacheLog {
 
         if (data == null) {
             data = new ArrayList<String>();
-            data.add("TAG, MESSAGE, TIME");
+            data.add("TAG, MESSAGE, TIME\n");
         }
 
 
-
     }
+
     public static boolean isInstantiated() {
         if (log == null)
             return false;
@@ -48,11 +49,11 @@ public class CacheLog {
         if (startLogTime == 0)
             startLogTime = time;
 
-        log.add( "[" + (time-startLogTime) + "]:  " + info + "\n");
+        log.add("[" + (time - startLogTime) + "]:  " + info + "\n");
     }
 
     public static void writeData(String tag, String message) {
-        writeData(tag, message,System.currentTimeMillis());
+        writeData(tag, message, System.currentTimeMillis());
     }
 
     public static void writeData(String tag, String message, Long time) {
@@ -61,24 +62,27 @@ public class CacheLog {
         if (startTime == 0)
             startTime = time;
 
-        data.add( tag + ", " + message + ", " + (time - startTime) + "\n");
+        data.add(tag + ", " + message + ", " + (time - startTime) + "\n");
     }
 
     public static void clearData(String file) {
 
-        CacheLog.outToFile(file);
+        if (file != null)
+            fileName = file;
+
+        CacheLog.outToFile();
 
         CacheLog.writeLog("Clearing Data!!!");
         startTime = 0;
         data.clear();
-        data.add("TAG, MESSAGE, TIME");
+        data.add("TAG, MESSAGE, TIME\n");
     }
 
     public static ArrayList<String> getLog() {
         return log;
     }
 
-    private static void outToFile(String name) {
+    private static void outToFile() {
 
         if (!isExternalStorageWritable())
             return;
@@ -86,14 +90,15 @@ public class CacheLog {
         CacheLog.writeLog("Media is mounted");
         File file = Environment.getExternalStorageDirectory();
 
-        File sim = new File(file, "Driving Sim App/");
-        sim.getParentFile().mkdirs();
-        sim = new File(sim,name+".txt");
+        File sim = new File(file, fileDir + "/");
+        sim.mkdirs();
+
+        sim = new File(sim, fileName + ".txt");
 
         try {
             BufferedWriter bor = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(sim)));
             for (String s : data) {
-                Log.wtf("test",s);
+                Log.wtf("test", s);
                 bor.write(s);
             }
             bor.close();
@@ -116,6 +121,16 @@ public class CacheLog {
             return true;
         }
         return false;
+    }
+
+    public static void setFileName(String s) {
+        fileName = s;
+        CacheLog.writeLog("Setting file name: " + s);
+    }
+
+    public static void setFileDir(String s) {
+        fileDir = s;
+        CacheLog.writeLog("Setting file directory: " + s);
     }
 
 }

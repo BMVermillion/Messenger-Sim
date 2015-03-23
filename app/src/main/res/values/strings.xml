@@ -6,21 +6,21 @@
     <string name="edit_message">Message Edited</string>
     <string name="Left">Left</string>
     <string name="Center">Center</string>
-
-
-
     <string name="Right">Right</string>
     <string name="title_activity_log_display">LogDisplay</string>
     <string name="Log">Log</string>
     <string name="Refresh">Refresh</string>
-    <string name="ServiceKill">Force Stop Service</string>
-    <string name="Clear">Clear</string>
+    <string name="Clear">Clear Screen</string>
+    <string name="file_out">Manual File Out</string>
     <string name="title_activity_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="note">Note:
         The app takes in messages in the format of <i>tag_message</i>. The tag field tells the app what to do and the message field will display in the message feed of the app.
         \n\nSimulator Visibility sets the visibility of the signal bar at the top of the app. If you need text to display at the start of a experiment
-        set it in the start text area. Any text sent with the start tag will always be ignored. The same rules apply to the stop tag.
-    </string>
+        set it in the start text area. Any text sent with the start tag will always be ignored. The same rules apply to the stop tag.</string>
+    <string name="message_notification_title_template">Message: %1$s</string>
+    <string name="message_notification_placeholder_text_template">You said %1$s and lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam non enim magna. Morbi dictum, velit vel semper venenatis, magna odio volutpat velit, at ullamcorper nulla lacus sed turpis. Pellentesque vitae metus elit, nec tincidunt tellus. Integer sed nisl sem, ullamcorper ornare lacus. Duis ac mauris sed massa congue volutpat. Donec sed erat sit amet turpis viverra rhoncus sit amet nec magna. Donec lacinia ligula at libero volutpat volutpat nec nec tortor.</string>
+    <string name="action_share">Share</string>
+    <string name="action_reply">Reply</string>
 
 </resources>

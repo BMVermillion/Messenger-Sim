@@ -1,17 +1,17 @@
 package com.example.iems.testapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.text.Editable;
-import android.text.Layout;
-import android.util.AttributeSet;
-import android.view.SurfaceView;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Space;
 import android.widget.TextView;
@@ -20,9 +20,10 @@ import android.widget.TextView;
  * Created by IEMS on 2/16/2015.
  */
 public class MessageBox extends RelativeLayout {
-    Circle circle;
-    TextView text;
-    String data;
+   // private Circle circle;
+    private TextView text;
+    private String data;
+
 
     public MessageBox(Context context, boolean orientation, Editable text) {
         super(context);
@@ -32,40 +33,60 @@ public class MessageBox extends RelativeLayout {
 
     private void init(Context context, boolean orientation) {
 
-        this.setBackgroundColor(Color.LTGRAY);
-        this.setPadding(20,10,20,10);
-
+        int sides = getPix(60f);
+        int tb = getPix(15f);
+        int minHeight = getPix(70f);
+        int innerPadding = getPix(10f);
 
         text = new TextView(context);
-        circle = new Circle(context, (orientation?"D":"A"));
+        //circle = new Circle(context, (orientation ? "D" : "A"));
 
         text.setText(data);
         text.setTextSize(20.0f);
+        text.setMinHeight(minHeight);
+        text.setPadding(innerPadding,innerPadding,innerPadding,innerPadding);
 
-        LayoutParams c = new LayoutParams(100, 100);
-        LayoutParams t = new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+
+       // LayoutParams c = new LayoutParams(padding, padding);
+       // Space space = new Space(context);
+       // space.setBackgroundColor(Color.GREEN);
+       // space.setVisibility(VISIBLE);
+
+        LayoutParams t = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+
         if (orientation) {
-            c.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-            circle.setLayoutParams(c);
 
+            //circle.setLayoutParams(c);
+           // c.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
             t.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            text.setLayoutParams(t);
-        }
-        else {
-            c.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            circle.setLayoutParams(c);
+            this.setPadding(sides, tb, tb, tb);
+            text.setGravity(Gravity.RIGHT);
+            text.setBackgroundColor(Color.rgb(133,194,255));
 
+           // text.setLayoutParams(t);
+        } else {
+
+            //circle.setLayoutParams(c);
+            //c.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
             t.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-            text.setLayoutParams(t);
+            this.setPadding(tb, tb, sides, tb);
+            text.setGravity(Gravity.LEFT);
+            text.setBackgroundColor(Color.rgb(180, 222, 255));
+            //text.setLayoutParams(t);
         }
+       //space.setLayoutParams(c);
+        text.setLayoutParams(t);
 
-        this.addView(circle);
+        //this.addView(space);
         this.addView(text);
-
 
     }
 
+    private int getPix(float dp) {
+        DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+        dp = metrics.density * dp;
+        return(int) (dp + 0.5f);
 
-
+    }
 }
 

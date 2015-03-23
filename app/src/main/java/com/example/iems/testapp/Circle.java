@@ -5,8 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.view.SurfaceView;
-import android.view.TextureView;
 import android.view.View;
 
 /**
@@ -28,7 +26,6 @@ class Circle extends View {
         super(context);
 
 
-
         this.user = user;
 
         this.setBackgroundColor(Color.LTGRAY);
@@ -48,16 +45,16 @@ class Circle extends View {
 
     protected void onDraw(Canvas canvas) {
         canvas.drawCircle(x, y, r, paint);
-        canvas.drawText(user, x, y+offset, font);
+        canvas.drawText(user, x, y + offset, font);
     }
 
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         this.w = w;
         this.h = h;
 
-        x = w/2;
-        y = w/2;
-        r = h/2 - 10;
+        x = w / 2;
+        y = w / 2;
+        r = h / 2 - 10;
 
         int size = 0;
         while (true) {
@@ -66,8 +63,8 @@ class Circle extends View {
                 font.setTextSize(--size);
 
                 Rect rect = new Rect();
-                font.getTextBounds(user,0,1,rect);
-                offset = rect.height()/2;
+                font.getTextBounds(user, 0, 1, rect);
+                offset = rect.height() / 2;
                 break;
             }
         }
