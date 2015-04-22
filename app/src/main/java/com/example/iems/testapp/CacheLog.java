@@ -23,7 +23,7 @@ public class CacheLog {
     private static long startTime = 0;
     private static long startLogTime = 0;
 
-    private static String fileName = "default.txt";
+    private static String fileName = "default";
     private static String fileDir = "Driving Sim";
 
     public static void instantiate() {

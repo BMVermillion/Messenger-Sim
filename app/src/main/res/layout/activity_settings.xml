@@ -80,15 +80,6 @@
             android:text="Driving Sim/" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/note"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:text="@string/note" />
-
     <LinearLayout
         android:id="@+id/port"
         android:layout_width="fill_parent"
@@ -127,9 +118,9 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/port"
+        android:orientation="horizontal"
         android:layout_centerHorizontal="true"
-        android:orientation="horizontal">
+        android:layout_below="@+id/port">
 
         <Button
             android:id="@+id/button2"
@@ -150,4 +141,13 @@
             android:onClick="resetSettings"
             android:text="Defaults" />
     </LinearLayout>
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Single button mode"
+        android:id="@+id/single"
+        android:layout_below="@+id/sigToggle"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>

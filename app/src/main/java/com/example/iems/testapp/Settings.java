@@ -4,30 +4,41 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.TextView;
+
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.Enumeration;
 
 
 public class Settings extends ActionBarActivity {
 
     private Switch toggle;
+    private Switch single;
     private EditText startText;
     private EditText stopText;
     private EditText folder;
     private EditText port;
     private SharedPreferences settingPrefs;
+    private TextView ipText;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
         toggle = ((Switch) findViewById(R.id.sigToggle));
+        single = ((Switch) findViewById(R.id.single));
         startText = ((EditText) findViewById(R.id.editStartText));
         stopText = ((EditText) findViewById(R.id.editStopText));
         folder = ((EditText) findViewById(R.id.folderEdit));
         port = ((EditText) findViewById(R.id.portEdit));
-
         settingPrefs = getSharedPreferences("settings", MODE_PRIVATE);
     }
 
@@ -35,15 +46,18 @@ public class Settings extends ActionBarActivity {
     protected void onStart() {
         super.onStart();
         toggle.setChecked(settingPrefs.getBoolean("toggle", true));
+        single.setChecked(settingPrefs.getBoolean("single", false));
         startText.setText(settingPrefs.getString("start", ""));
         stopText.setText(settingPrefs.getString("stop", ""));
         folder.setText(settingPrefs.getString("folder", "Driving Sim"));
         port.setText(settingPrefs.getString("port", "50001"));
+
     }
 
     public void resetSettings(View view) {
 
         toggle.setChecked(true);
+        single.setChecked(false);
         startText.setText("");
         stopText.setText("");
         folder.setText("Driving Sim/");
@@ -57,6 +71,7 @@ public class Settings extends ActionBarActivity {
         CacheLog.writeLog("Changing settings!");
 
         boolean toggleVal = toggle.isChecked();
+        boolean singleVal = single.isChecked();
         String startVal = startText.getText().toString();
         String stopVal = stopText.getText().toString();
         String folderVal = folder.getText().toString();
@@ -64,6 +79,7 @@ public class Settings extends ActionBarActivity {
 
         SharedPreferences.Editor editor = settingPrefs.edit();
         editor.putBoolean("toggle", toggleVal);
+        editor.putBoolean("single", singleVal);
         editor.putString("start", startVal);
         editor.putString("stop", stopVal);
         editor.putString("folder", folderVal);

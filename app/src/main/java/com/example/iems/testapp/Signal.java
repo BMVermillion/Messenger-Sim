@@ -9,8 +9,9 @@ import android.util.Log;
 import android.view.View;
 
 /**
- * Created by IEMS on 2/11/2015.
+ * Created by Brian Vermillion on 2/11/2015.
  */
+
 public class Signal extends View {
 
     private int w;

@@ -22,7 +22,9 @@
         android:id="@+id/messages"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:longClickable="true"
+        android:focusable="true">
 
         <LinearLayout
             android:id="@+id/scrollLayout"
@@ -41,7 +43,11 @@
             android:id="@+id/editText"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:clickable="true"
+            android:onClick="onTextBoxClick"
+            android:enabled="true"
+            android:focusable="true" />
 
         <Button
             android:id="@+id/button"
@@ -49,7 +55,8 @@
             android:layout_height="fill_parent"
             android:layout_weight=".1"
             android:onClick="setMessage"
-            android:text="Send" />
+            android:text="Send"
+            android:longClickable="false" />
     </LinearLayout>
 
 </LinearLayout>

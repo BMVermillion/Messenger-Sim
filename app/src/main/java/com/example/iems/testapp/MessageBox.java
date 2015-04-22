@@ -88,5 +88,9 @@ public class MessageBox extends RelativeLayout {
         return(int) (dp + 0.5f);
 
     }
+
+    public void changeBackground() {
+        text.setBackgroundColor(Color.LTGRAY);
+    }
 }
 

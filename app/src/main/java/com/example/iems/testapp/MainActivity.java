@@ -1,5 +1,6 @@
 package com.example.iems.testapp;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +16,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -27,7 +30,6 @@ import static android.widget.LinearLayout.VISIBLE;
 public class MainActivity extends ActionBarActivity {
 
     public final int SETTINGS_REQUEST_CODE = 1;
-    private final String delim = "_";
     private final int DEFAULT_PORT = 50001;
     private final int COOLDOWN_TIME = 1000;
 
@@ -37,9 +39,15 @@ public class MainActivity extends ActionBarActivity {
     private Signal sig;
     private String startMessage;
     private String stopMessage;
+    private Button send;
+    private MessageBox lastMessage;
 
     public static int width;
     public static int height;
+
+    public boolean started = false;
+    private boolean hiddenBox = false;
+    private int settings = 0;
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -60,12 +68,13 @@ public class MainActivity extends ActionBarActivity {
         text = (EditText) findViewById(R.id.editText);
         sig = (Signal) findViewById(R.id.signalView);
         slider = (ScrollView) findViewById(R.id.messages);
-
+        send = (Button) findViewById(R.id.button);
 
         Intent serviceIntent = new Intent(this, NetworkService.class);
         serviceIntent.putExtra("port", DEFAULT_PORT);
         startService(serviceIntent);
 
+        registerForContextMenu(send);
 
     }
 
@@ -91,13 +100,12 @@ public class MainActivity extends ActionBarActivity {
     protected void onStart() {
         super.onResume();
 
-        //Add messages that were sent while the app was not in view
         if (CacheLog.isInstantiated())
             CacheLog.writeLog("Starting MainActivity");
 
-        //Sets the visibility of the signal
         SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
         boolean toggleVisibility = prefs.getBoolean("toggle", true);
+        hiddenBox = prefs.getBoolean("single", false);
         startMessage = prefs.getString("start", "");
         stopMessage = prefs.getString("stop", "");
 
@@ -105,6 +113,11 @@ public class MainActivity extends ActionBarActivity {
             sig.setVisibility(VISIBLE);
         else
             sig.setVisibility(GONE);
+
+        if (hiddenBox)
+            hideTextBox();
+        else
+            unhideTextBox();
 
         scrollToBottom();
     }
@@ -170,7 +183,7 @@ public class MainActivity extends ActionBarActivity {
 
     private void messageSelector(String message) {
 
-        String[] tokens = message.split(delim);
+        String[] tokens = message.split("_");
 
         if (tokens == null)
             return;
@@ -193,7 +206,7 @@ public class MainActivity extends ActionBarActivity {
                 break;
 
             case "start":
-
+                started = true;
                 if (tokens.length > 1)
                     CacheLog.setFileName("Subject-" + tokens[1]);
                 else
@@ -213,7 +226,6 @@ public class MainActivity extends ActionBarActivity {
                 break;
 
             case "stop":
-                //CacheLog.writeData("Received", tokens[0]);
                 if (stopMessage != null && stopMessage.length() >= 1) {
                     setMessage(stopMessage);
                     CacheLog.writeData("stop",stopMessage);
@@ -242,20 +254,50 @@ public class MainActivity extends ActionBarActivity {
         if (s.equals(""))
             return;
 
-        post(new MessageBox(this, true, Editable.Factory.getInstance().newEditable(s)));
+        if (lastMessage != null)
+            lastMessage.changeBackground();
+
+        lastMessage = new MessageBox(this, true, Editable.Factory.getInstance().newEditable(s));
+        post(lastMessage);
     }
 
     public void setMessage(View view) {
-        Editable userInput = text.getText();
-        if (userInput.toString().equals(""))
+
+        if (hiddenBox) {
+            if (lastMessage != null)
+                lastMessage.changeBackground();
+
+            CacheLog.writeData("confirm","Button press");
+            lastMessage = new MessageBox(this, false, Editable.Factory.getInstance().newEditable("Confirmation Sent"));
+            post(lastMessage);
             return;
+        }
+
+        Editable userInput = text.getText();
+        if (userInput.toString().equals("")) {
+            if (++settings == 5) {
+                Intent intent = new Intent(this, Settings.class);
+                startActivityForResult(intent, SETTINGS_REQUEST_CODE);
+                Log.wtf("Menu", "Opening settings");
+                settings = 0;
+            }
+            return;
+        }
+        settings = 0;
 
         CacheLog.writeData("post", userInput.toString(), System.currentTimeMillis());
         CacheLog.writeLog("Posted \"" + userInput.toString() + "\"");
 
-        post(new MessageBox(this, false, userInput));
+
+        if (lastMessage != null)
+            lastMessage.changeBackground();
+
+        lastMessage = new MessageBox(this, false, userInput);
+        post(lastMessage);
 
         text.setText("");
+
+        hideSoftKeyboard(MainActivity.this, view);
     }
 
     private void post(MessageBox m) {
@@ -286,5 +328,30 @@ public class MainActivity extends ActionBarActivity {
                 }, COOLDOWN_TIME);
     }
 
+    public void onTextBoxClick(View view) {
+            CacheLog.writeData("click", "");
+            CacheLog.writeLog("User clicked text box");
+    }
 
+    private static void hideSoftKeyboard (Activity activity, View view)
+    {
+        InputMethodManager imm = (InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
+    }
+
+    /*
+    Functions for changing the app to single button mode. This mode
+    sends a confirmation message in place of a user response.
+     */
+    //////////////////////////////////////
+    private void hideTextBox() {
+        text.setVisibility(View.GONE);
+        send.setText("Confirm");
+    }
+
+    private void unhideTextBox() {
+        text.setVisibility(View.VISIBLE);
+        send.setText("Send");
+    }
+    //////////////////////////////////////
 }
