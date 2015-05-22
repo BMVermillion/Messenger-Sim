@@ -1,4 +1,4 @@
-package com.example.iems.testapp;
+package com.example.iems.testapp.display;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -11,6 +11,10 @@ import android.view.View;
 /**
  * Created by Brian Vermillion on 2/11/2015.
  */
+
+enum Signals {
+    LEFT, RIGHT, CENTER
+}
 
 public class Signal extends View {
 

@@ -1,4 +1,4 @@
-package com.example.iems.testapp;
+package com.example.iems.testapp.display;
 
 import android.content.Context;
 import android.graphics.Canvas;

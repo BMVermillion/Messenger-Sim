@@ -1,4 +1,4 @@
-package com.example.iems.testapp;
+package com.example.iems.testapp.display;
 
 import android.content.Context;
 import android.content.Intent;
@@ -25,9 +25,9 @@ public class MessageBox extends RelativeLayout {
     private String data;
 
 
-    public MessageBox(Context context, boolean orientation, Editable text) {
+    public MessageBox(Context context, boolean orientation, String text) {
         super(context);
-        data = text.toString();
+        data = text;
         init(context, orientation);
     }
 

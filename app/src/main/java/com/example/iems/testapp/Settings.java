@@ -4,18 +4,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.Enumeration;
+import com.example.iems.testapp.message.CacheLog;
 
 
 public class Settings extends ActionBarActivity {
@@ -63,12 +57,10 @@ public class Settings extends ActionBarActivity {
         folder.setText("Driving Sim/");
         port.setText("50001");
 
-        CacheLog.writeLog("Loading defaults.");
     }
 
     public void setSettings(View view) {
 
-        CacheLog.writeLog("Changing settings!");
 
         boolean toggleVal = toggle.isChecked();
         boolean singleVal = single.isChecked();

@@ -11,7 +11,7 @@
 
     <view
         android:id="@+id/signalView"
-        class="com.example.iems.testapp.Signal"
+        class="com.example.iems.testapp.display.Signal"
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:background="#ffffffff"
@@ -56,7 +56,7 @@
             android:layout_weight=".1"
             android:onClick="setMessage"
             android:text="Send"
-            android:longClickable="false" />
+            android:longClickable="true" />
     </LinearLayout>
 
 </LinearLayout>
