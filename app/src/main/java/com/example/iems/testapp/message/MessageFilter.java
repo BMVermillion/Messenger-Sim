@@ -30,8 +30,8 @@ public class MessageFilter extends IntentService {
     private static final String ACTION_SIGNAL = "com.example.iems.testapp.message.action.SIGNAL";
 
 
-    private String EventAction;
-    private String EventMessage;
+    private static String EventAction;
+    private static String EventMessage;
 
     // TODO: Rename parameters
     private static final String MESSAGE = "com.example.iems.testapp.message.extra.MESSAGE";
@@ -124,6 +124,8 @@ public class MessageFilter extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             Log.wtf("MessageHandler", intent.getAction());
+            Log.wtf("Message", EventAction + " -- " + EventMessage);
+
 
             final String action = intent.getAction();
             checkEvent(action);
@@ -155,11 +157,11 @@ public class MessageFilter extends IntentService {
                 final String event_action = intent.getStringExtra(ACTION);
                 final String command = intent.getStringExtra(RET_MESSAGE);
                 final long time = intent.getLongExtra(TIME,0);
-                Log.wtf("Message", event_action + " -- " + command);
+                //Log.wtf("Message", event_action + " -- " + command);
 
                 if (event_action != null && event_action != "") {
                     Log.wtf("Message", "Writing to EventAction");
-                    EventAction = event_action;
+                    EventAction = "com.example.iems.testapp.message.action." + event_action.toUpperCase();
                 }
 
                 if (command != null && command != "")
@@ -195,8 +197,13 @@ public class MessageFilter extends IntentService {
     }
 
     private void checkEvent(String tag) {
-        if (EventAction != null && EventAction.equals(tag))
+        if (EventAction != null && EventAction.equals(tag)) {
             NetworkOut.startActionMessageOut(this, EventMessage);
+            EventAction = null;
+            EventMessage = null;
+        }
+
+
     }
 
 }

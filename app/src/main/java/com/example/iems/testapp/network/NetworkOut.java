@@ -10,10 +10,12 @@ import com.example.iems.testapp.message.MessageFilter;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 
-public class NetworkOut extends IntentService {
+public class NetworkOut extends IntentService implements Runnable{
 
     private static final String ACTION_MESSAGE_OUT = "com.example.iems.testapp.network.action.MESSAGE_OUT";
     private static final String ACTION_SETTINGS = "com.example.iems.testapp.network.action.SETTINGS";
@@ -38,8 +40,9 @@ public class NetworkOut extends IntentService {
     }
 
 
-    private String IPAddress;
-    private int port;
+    private static String IPAddress;
+    private static int port;
+    private String message;
 
     public NetworkOut() {
         super("NetworkOut");
@@ -51,8 +54,8 @@ public class NetworkOut extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_MESSAGE_OUT.equals(action)) {
-                final String param1 = intent.getStringExtra(MESSAGE);
-                handleActionMessageOut(param1);
+                message = intent.getStringExtra(MESSAGE);
+                handleActionMessageOut();
             }
             else if (ACTION_SETTINGS.equals(action)) {
                 final String ip = intent.getStringExtra(IP);
@@ -64,17 +67,49 @@ public class NetworkOut extends IntentService {
     }
 
 
-    private void handleActionMessageOut(String message) {
+    private void handleActionMessageOut() {
+        new Thread(this).start();
+    }
 
+   private void onMessageFail(String how, String message) {
+       MessageFilter.startActionFail(this, message, how);
+   }
+
+   private void setNetworkParams(String ip, int port) {
+       IPAddress = ip;
+       this.port = port;
+   }
+
+    @Override
+    public void run() {
         if (IPAddress == null || port == 0)
             onMessageFail("No IP", message);
 
 
         Socket clientSocket = null;
+        InetAddress addr = null;
         try {
-            clientSocket = new Socket(IPAddress, port);
+            addr = InetAddress.getByName(IPAddress);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            String stack = "";
+            for (StackTraceElement l : e.getStackTrace())
+                stack += l.toString() + '\n';
+
+            Log.wtf("Bad address", stack);
+        }
+
+        try {
+            clientSocket = new Socket(addr, port);
         } catch (IOException e) {
             onMessageFail("Failed to create socket", message);
+
+            e.printStackTrace();
+            String stack = "";
+            for (StackTraceElement l : e.getStackTrace())
+                stack += l.toString();
+
+            Log.wtf("Socket Failure", stack);
             return;
         }
 
@@ -99,13 +134,4 @@ public class NetworkOut extends IntentService {
             onMessageFail("Failed to send", message);
         }
     }
-
-   private void onMessageFail(String how, String message) {
-       MessageFilter.startActionFail(this, message, how);
-   }
-
-   private void setNetworkParams(String ip, int port) {
-       IPAddress = ip;
-       this.port = port;
-   }
 }

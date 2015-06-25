@@ -155,22 +155,31 @@ public class NetworkReciever extends Service implements Runnable {
 
         switch (tokens[0]) {
             case "subject":
-                CacheLog.setFileParams("Subject-"+tokens[1]+"-"+tokens[2]);
-                NetworkOut.startActionSettings(this, tokens[3],Integer.valueOf(tokens[4]));
+                sendNotification();
+                int length = tokens.length;
+                String file_name = "Subject";
+                for (int i=1; i<length-2; i++)
+                    file_name+= "-"+tokens[i];
+
+                CacheLog.setFileParams(file_name);
+                NetworkOut.startActionSettings(this, tokens[length-2],Integer.valueOf(tokens[length-1]));
                 break;
             case "left":
+                sendNotification();
                 MessageFilter.startActionSignal(this, "Left");
                 intent.putExtra("TAG", "Left");
                 this.sendBroadcast(intent);
                 break;
 
             case "center":
+                sendNotification();
                 MessageFilter.startActionSignal(this, "Center");
                 intent.putExtra("TAG", "Center");
                 this.sendBroadcast(intent);
                 break;
 
             case "right":
+                sendNotification();
                 MessageFilter.startActionSignal(this, "Right");
                 intent.putExtra("TAG", "Right");
                 this.sendBroadcast(intent);
@@ -186,6 +195,7 @@ public class NetworkReciever extends Service implements Runnable {
 
             case "":
             case "message":
+                sendNotification();
                 String txt_message = null;
                 String action = null;
                 String command = null;
@@ -213,7 +223,7 @@ public class NetworkReciever extends Service implements Runnable {
                 break;
         }
 
-        sendNotification();
+
     }
 
     private void sendNotification() {

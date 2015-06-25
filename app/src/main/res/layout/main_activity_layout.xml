@@ -18,7 +18,7 @@
         android:clickable="false"
         android:elevation="20dp" />
 
-    <ScrollView
+    <com.example.iems.testapp.display.MyScroll
         android:id="@+id/messages"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
@@ -31,7 +31,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"></LinearLayout>
-    </ScrollView>
+    </com.example.iems.testapp.display.MyScroll>
 
     <LinearLayout
         android:layout_width="match_parent"

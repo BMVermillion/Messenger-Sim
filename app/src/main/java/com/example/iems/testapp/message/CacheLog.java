@@ -42,6 +42,10 @@ public class CacheLog {
     }
 
     public static void writeToFile(String tag, String message, long time) {
+
+        if (fileName == null)
+            return;
+
         if (fileOut != null)
             try {
                 fileOut.write(tag + ", " + message + ", " + (time - startTime) + "\n");
@@ -103,6 +107,7 @@ public class CacheLog {
             writeToFile("stop","");
             fileOut.close();
             fileOut = null;
+            fileName = null;
         } catch (IOException e) {
             e.printStackTrace();
         }

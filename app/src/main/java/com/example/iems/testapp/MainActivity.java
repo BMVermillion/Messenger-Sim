@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
@@ -112,6 +113,9 @@ public class MainActivity extends ActionBarActivity {
             hideTextBox();
         else
             unhideTextBox();
+
+
+        hideSoftKeyboard(this);
 
         //Automatically scrolls to the most recent message
         scrollToBottom();
@@ -265,6 +269,9 @@ public class MainActivity extends ActionBarActivity {
 
         text.setText("");
 
+        if (this.getCurrentFocus() != null)
+            hideSoftKeyboard(this);
+
         //hideSoftKeyboard(MainActivity.this, view);
     }
 
@@ -284,7 +291,9 @@ public class MainActivity extends ActionBarActivity {
                 slider.fullScroll(View.FOCUS_DOWN);
             }
         });
+
     }
+
 
     private void signalCooldown() {
         Handler handler = new Handler();
@@ -299,14 +308,15 @@ public class MainActivity extends ActionBarActivity {
 
     public void onTextBoxClick(View view) {
         MessageFilter.startActionClick(this, System.currentTimeMillis());
-        scrollToBottom();
 
     }
 
-    private static void hideSoftKeyboard (Activity activity, View view)
+
+
+    private static void hideSoftKeyboard (Activity activity)
     {
         InputMethodManager imm = (InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
+        imm.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
     public void signalLeft() {
